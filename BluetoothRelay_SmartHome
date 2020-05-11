@@ -1,0 +1,109 @@
+/*////////////////////////////////////////////////////////
+TUTORIAL    : 2 Relay Module + HC05 Bluetooth + Android
+Author      : masqushlabs | www.masqush.com
+Email       : mohammadqushay@gmail.com
+Date        : 10/05/2020
+////////////////////////////////////////////////////////
+*/ 
+
+// include library software serial 
+#include <SoftwareSerial.h>
+SoftwareSerial mySerial(8, 9); // RX, TX
+
+// set variable untuk olah data bluetoth
+String dtaBT="";
+char chark;
+
+// define lampu
+#define   LAMP1            6   //pin 5 untuk relay ch1
+#define   LAMP2            7   //pin 6 untuk relay ch2
+
+
+
+///////////////////////////////
+/*        void setup         */
+///////////////////////////////
+void setup(){
+  
+  // inisialisasi Port Serial
+  Serial.begin(9600);
+  mySerial.begin(9600);
+
+  // inisialisasi pin arduino
+  pinMode(LAMP1, OUTPUT);
+  pinMode(LAMP2, OUTPUT);
+
+  // inisialisasi off semua relay
+  digitalWrite(LAMP1,LOW);
+  digitalWrite(LAMP2,LOW);
+  delay(1000);
+  digitalWrite(LAMP1,HIGH);
+  digitalWrite(LAMP2,HIGH);
+
+}
+
+///////////////////////////////
+/*        void loop          */
+///////////////////////////////
+void loop(){
+  
+  // baca data bluetooth
+   while(mySerial.available()>0){
+    dtaBT+=(String)(char)mySerial.read();
+  }
+
+  // chek kalo ada data dari bluetoth
+  if(dtaBT!=""){
+
+      // Trim untuk menghilangkan karakter space dan enter pada aplikasi bluetooth
+      dtaBT.trim();
+      // tulis data dari bluetooth ke serial monitor
+      Serial.println(dtaBT);
+      
+      ////////////////////////////////////////////
+      /*         Cek data request ON lampu      */
+      ////////////////////////////////////////////
+      if(dtaBT=="L1ON"){ //jika request lampu 1 nyala
+          digitalWrite(LAMP1, LOW);
+          mySerial.println(F("LAMP1 NYALA"));
+      }
+
+      if(dtaBT=="L2ON"){ //jika request lampu 2 nyala
+          digitalWrite(LAMP2, LOW);
+          mySerial.println(F("LAMP2 NYALA"));
+      }
+
+      ////////////////////////////////////////////
+      /*         Cek data request ON lampu      */
+      ////////////////////////////////////////////
+      if(dtaBT=="L1OFF"){ //jika request lampu 3 nyala
+          digitalWrite(LAMP1, HIGH);
+          mySerial.println(F("LAMP1 MATI"));
+      }
+
+      if(dtaBT=="L2OFF"){ //jika request lampu 4 nyala
+          digitalWrite(LAMP2, HIGH);
+          mySerial.println(F("LAMP2 MATI"));
+      }
+     
+      ////////////////////////////////////////////
+      /*         Request ALL ON dan ALL OFF     */
+      ////////////////////////////////////////////
+      if(dtaBT=="ALLON"){ //jika request lampu 8 nyala
+          digitalWrite(LAMP1, LOW);
+          digitalWrite(LAMP2, LOW);          
+          mySerial.println(F("All Lamp ON"));
+      }
+
+      if(dtaBT=="ALLOFF"){ //jika request lampu 8 nyala
+          digitalWrite(LAMP1, HIGH);
+          digitalWrite(LAMP2, HIGH);
+          
+          mySerial.println(F("All Lamp OFF!"));
+      }
+      // reset variable ke empty
+      dtaBT="";
+  }  
+  delay(1000); 
+}
+
